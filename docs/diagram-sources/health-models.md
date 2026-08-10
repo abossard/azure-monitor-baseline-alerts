@@ -41,7 +41,7 @@ Node colour is set by the `class` assignment, not by the label text:
 ## Diagram 1: AMBA alerts become signals
 
 ```mermaid swimlane title="AMBA alerts become health model signals" subtitle="Signals set entity health, entities roll up, only the root carries the objective"
-%%| lanes: ["Domain root", "Landing zone flows", "Platform capabilities", "Azure resources and their signals"]
+%%| lanes: ["Domain root", "Landing zone flows", "System flows", "Azure resources and their signals"]
 flowchart BT
     erSig["ExpressRoute BGP availability = 98.7% (unhealthy)<br/>Ingress bits = 1.4 Gbps (healthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
     vpnSig["Azure Resource Health = Available (healthy)"] --> vpn["VPN gateway<br/>healthy"]
@@ -121,7 +121,7 @@ flowchart BT
 ## Diagram 4: A referenced domain model
 
 ```mermaid swimlane title="Connectivity-Contoso-Prod" subtitle="The referenced model carries the entities and the signals"
-%%| lanes: ["Model root", "Flows", "Capabilities", "Azure resources and their signals"]
+%%| lanes: ["Model root", "Flows", "System flows", "Azure resources and their signals"]
 flowchart BT
     erSig["ExpressRoute BGP availability = 98.7% (unhealthy)<br/>Ingress bits = 1.4 Gbps (healthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
     vpnSig["Azure Resource Health = Available (healthy)"] --> vpn["VPN gateway<br/>healthy"]
@@ -204,52 +204,57 @@ flowchart TB
 
 ## Diagram 7: Adoption step 2, analyze
 
-```mermaid swimlane title="Adoption step 2, analyze" subtitle="Keep the alert rules you act on, group them into platform aspects"
-%%| lanes: ["Model root", "Platform aspects"]
+```mermaid swimlane title="Adoption step 2, analyze" subtitle="Model the system flows you offer, then hang the contributing resources underneath"
+%%| lanes: ["Model root", "System flows you offer", "Contributing resources"]
 flowchart BT
-    erSig["ExpressRoute BGP availability = 99.9%<br/>VPN tunnel state = connected"] --> reach["Hybrid reachability<br/>healthy"]
-    fwSig["Firewall health = 100%<br/>SNAT port utilisation = 38%"] --> egress["Egress control<br/>healthy"]
-    kvSig["Key Vault availability = 100%<br/>Certificate expiry = 9 days (degraded)"] --> secrets["Secrets and certificates<br/>degraded"]
-    lawSig["Log ingestion latency = 3 min"] --> pipe["Telemetry pipeline<br/>healthy"]
+    erSig["BGP availability = 99.9%"] --> er["ExpressRoute circuit<br/>healthy"]
+    vpnSig["Tunnel state = connected"] --> vpn["VPN gateway<br/>healthy"]
+    fwSig["Firewall health = 100%<br/>SNAT port utilisation = 38%"] --> fw["Azure Firewall<br/>healthy"]
+    kvSig["Vault availability = 100%<br/>Certificate expiry = 9 days (degraded)"] --> kv["Key Vault<br/>degraded"]
 
-    reach --> root["Platform health<br/>degraded"]
+    er --> hybrid["Hybrid connectivity<br/>healthy"]
+    vpn --> hybrid
+    fw --> egress["Egress control<br/>healthy"]
+    kv --> secrets["Secret management<br/>degraded"]
+
+    hybrid --> root["Platform health<br/>degraded"]
     egress --> root
     secrets --> root
-    pipe --> root
 
     classDef blue fill:#eff6fc,stroke:#0078D4;
     classDef green fill:#f2f8f2,stroke:#a0d8a0;
     classDef amber fill:#fbf2e7,stroke:#db7500;
-    class erSig,fwSig,kvSig,lawSig blue;
-    class reach,egress,pipe green;
-    class secrets,root amber;
+    class erSig,vpnSig,fwSig,kvSig blue;
+    class er,vpn,fw,hybrid,egress green;
+    class kv,secrets,root amber;
 ```
 
 ## Diagram 8: Adoption step 3, refine
 
-```mermaid swimlane title="Adoption step 3, refine" subtitle="Add dependencies, tiers and an objective"
-%%| lanes: ["Model root", "Flows", "Capabilities", "Resources and signals"]
+```mermaid swimlane title="Adoption step 3, refine" subtitle="Split the system flow into paths, alert where it means something"
+%%| lanes: ["Domain model root", "System flows", "Paths", "Resources and signals"]
 flowchart BT
     erSig["BGP availability = 98.7% (unhealthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
-    vpnSig["Azure Resource Health = Available"] --> vpn["VPN gateway<br/>healthy"]
-    kvSig["Certificate expiry = 9 days (degraded)"] --> kv["Key Vault<br/>degraded"]
+    vpnSig["Tunnel state = connected"] --> vpn["VPN gateway<br/>healthy"]
+    fwSig["Firewall health = 100%"] --> fw["Azure Firewall<br/>healthy"]
 
-    er --> primary["Primary path<br/>(worst of)<br/>unhealthy"]
-    vpn --> backup["Failover path<br/>healthy"]
-    kv --> secrets["Secrets<br/>degraded"]
+    er --> primary["Primary path<br/>unhealthy"]
+    vpn --> failover["Failover path<br/>healthy"]
+    fw --> inspect["Egress inspection<br/>healthy"]
 
-    primary --> conn["Hybrid connectivity<br/>(not-healthy limit)<br/>degraded"]
-    backup --> conn
-    secrets -. "limited" .-> conn
+    primary --> hybrid["Hybrid connectivity<br/>(not-healthy limit)<br/>degraded"]
+    failover --> hybrid
+    inspect --> egress["Egress control<br/>healthy"]
 
-    conn --> root["Platform health<br/>objective 99.5%<br/>degraded"]
+    hybrid --> root["Connectivity-Contoso-Prod<br/>objective 99.5%<br/>degraded"]
+    egress --> root
 
     classDef blue fill:#eff6fc,stroke:#0078D4;
     classDef green fill:#f2f8f2,stroke:#a0d8a0;
     classDef amber fill:#fbf2e7,stroke:#db7500;
     classDef red fill:#faeceb,stroke:#ba0d16;
-    class erSig,vpnSig,kvSig blue;
-    class vpn,backup green;
-    class kv,secrets,conn,root amber;
+    class erSig,vpnSig,fwSig blue;
+    class vpn,failover,fw,inspect,egress green;
+    class hybrid,root amber;
     class er,primary red;
 ```

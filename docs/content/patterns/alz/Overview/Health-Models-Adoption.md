@@ -13,7 +13,7 @@ weight: 20
 > [What a health model adds](../Health-Models-Adoption#what-a-health-model-adds) </br>
 > [AMBA alerts become signals](../Health-Models-Adoption#amba-alerts-become-signals) </br>
 > [Health models at Landing Zone scale](../Health-Models-Adoption#health-models-at-landing-zone-scale) </br>
-> [An adoption path](../Health-Models-Adoption#an-adoption-path) </br>
+> [Health model adoption path](../Health-Models-Adoption#health-model-adoption-path) </br>
 > [References](../Health-Models-Adoption#references) </br>
 
 ## Overview
@@ -64,7 +64,7 @@ The health model designer has an **Import from alert rules** option that creates
 
 ![AMBA alerts become health model signals](../../media/amba-alerts-become-health-model-signals.svg)
 
-Read the diagram bottom to top. Signals sit inside the resource they measure. Resource state rolls into a platform capability, capabilities roll into a landing zone flow, and the flow rolls into the domain root that carries the objective.
+Read the diagram bottom to top. Signals sit inside the resource they measure. Resource state rolls into a system flow, system flows roll into a landing zone flow, and that rolls into the domain root carrying the objective.
 
 Two modelling decisions matter here. Hybrid connectivity uses a **not-healthy limit**, because it has a failover path: the primary network path is down but the failover is healthy, so the flow is degraded rather than an outage. The diagnostics pipeline is attached with **Suppressed**, so its state is visible on the graph but not impacting the connectivity flow.
 
@@ -84,7 +84,7 @@ Two modelling decisions matter here. Hybrid connectivity uses a **not-healthy li
 
 ## Health models at Landing Zone scale
 
-At scale, it's best to use a layered approach. You start with a high level model per tenant and then split into the different domains of your landing zones and further down the platforms and flows that build up their capabilites domains.
+At scale, it's best to use a layered approach. You start with a high level model per tenant and then split into the different domains of your landing zones and further down the platforms and system flows that build up those domains.
 
 ![Health models at tenant scale](../../media/health-models-at-tenant-scale.svg)
 
@@ -122,19 +122,21 @@ A [Resource Graph discovery rule](https://learn.microsoft.com/azure/azure-monito
 
 ### 2. Analyze and Modelling
 
-With the overview from the previous step, you can now model your commitments, e.g. that you're offering Egress Control, Secret Management and Hybrid connectivity. These are capabilities that you offer. Once you modelled them, you add the Azure resource that contribute to them as dependencies underneath with signals that represent that the resources are working as expected. The health state of the capability is then rolled up.
+With the overview from the previous step, you can now model your system flows that you're offering. E.g.: Egress Control, Secret Management and Hybrid connectivity.
+
+Once you modelled them, you add the Azure resources that contribute to them as dependencies and add signals that represent that they are working as intended. This will then rollup their state to it's parent and give you a clear view on the health of your platform.
 
 ![Adoption step 2, analyze](../../media/adoption-step-2-analyze.svg)
 
-This is a design step more than a configuration step. The output is a first model of platform health: a handful of aspects, each backed by the measurements you already trust.
+You might do this activity for each ALZ domain and cross check with the earlier discovery step to see if you have identified all contributing resources.
 
 ### 3. Refine
 
-For each ALZ domains you might create a specific health model that represents the capabilities and flows of that domain, which the resources that contribute to it. You can use a mix of manually build entities and modelling and combine it with discovery rules for places where you don't control the life cycle of the contributing resources.
+For each ALZ domains you might create a specific health model that represents the system flows of that domain, with the resources that contribute to it. You can use a mix of manually build entities and modelling and combine it with discovery rules for places where you don't control the life cycle of the contributing resources.
 
 ![Adoption step 3, refine](../../media/adoption-step-3-refine.svg)
 
-You build in failover paths and alerting on the levels where it's most meaningful to you. You can now separate between an outage of the secondary path and a full outage of all connectivity.
+Hybrid connectivity splits into a primary and a failover path, and uses a **not-healthy limit** so one failing path is degraded rather than an outage. The primary circuit is down here and the domain is degraded, not unhealthy. Alerting sits on the system flow and the root, where it means something, rather than on each circuit.
 
 ## References
 

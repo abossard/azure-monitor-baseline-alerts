@@ -9,7 +9,7 @@
 <text x="843.0" y="229.5" font-size="13" font-weight="700" fill="#323130">Flows</text>
 <rect x="0" y="282.0" width="999" height="90.0" fill="#ffffff"/>
 <line x1="0" y1="282.0" x2="999" y2="282.0" stroke="#e6e4e2"/>
-<text x="843.0" y="331.5" font-size="13" font-weight="700" fill="#323130">Capabilities</text>
+<text x="843.0" y="331.5" font-size="13" font-weight="700" fill="#323130">System flows</text>
 <rect x="0" y="372.0" width="999" height="117.0" fill="#faf9f8"/>
 <line x1="0" y1="372.0" x2="999" y2="372.0" stroke="#e6e4e2"/>
 <text x="843.0" y="426.5" font-size="13" font-weight="700" fill="#323130">Azure resources and</text>
