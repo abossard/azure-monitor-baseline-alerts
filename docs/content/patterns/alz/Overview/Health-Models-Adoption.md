@@ -13,6 +13,7 @@ weight: 20
 > [What a health model adds](../Health-Models-Adoption#what-a-health-model-adds) </br>
 > [AMBA alerts become signals](../Health-Models-Adoption#amba-alerts-become-signals) </br>
 > [Health models at Landing Zone scale](../Health-Models-Adoption#health-models-at-landing-zone-scale) </br>
+> [An adoption path](../Health-Models-Adoption#an-adoption-path) </br>
 > [References](../Health-Models-Adoption#references) </br>
 
 ## Overview
@@ -99,6 +100,41 @@ The same Azure resource can appear in several models, with different signals in 
 
 The hub firewall is one resource. The connectivity model watches SNAT ports and tunnel state. The partner exchange model watches threat intel hits and denied flows on the same device. Neither model carries signals it does not care about.
 
+
+## Health model adoption path
+
+Azure Monitoring health models can be adopted in three stages:
+1. Discovery: where you build up the inventory of all resources involved your landing zone
+2. Analyze and Modelling: where you decide what you matters to you, what are the platform and committments you want to track and which signals on which resources carry your commitments.
+3. Refine: over time and with gaining confidence in the model and signals you can improve the model and get an invaluable tool to track your landing zone health and commitments.
+
+### 1. Discovery
+
+Create one health model with a discovery rule per ALZ domain. This is inventory work: you are not deciding what healthy means yet, you are finding out what you actually run.
+
+![Adoption step 1, discovery](../../media/adoption-step-1-discovery.svg)
+
+A [Resource Graph discovery rule](https://learn.microsoft.com/azure/azure-monitor/health-models/discoveries) per domain brings in all involved Azure resources with recommended signals. This is your starting point to decide what matters to you.
+
+- with the *recommended signals* option, the current AMBA baseline alerts are being added as signals on the resource.
+- already a single signal over the threshold will degrade the whole domain. This means that you either have to update the threshold or split the domain.
+
+
+### 2. Analyze and Modelling
+
+With the overview from the previous step, you can now model your commitments, e.g. that you're offering Egress Control, Secret Management and Hybrid connectivity. These are capabilities that you offer. Once you modelled them, you add the Azure resource that contribute to them as dependencies underneath with signals that represent that the resources are working as expected. The health state of the capability is then rolled up.
+
+![Adoption step 2, analyze](../../media/adoption-step-2-analyze.svg)
+
+This is a design step more than a configuration step. The output is a first model of platform health: a handful of aspects, each backed by the measurements you already trust.
+
+### 3. Refine
+
+For each ALZ domains you might create a specific health model that represents the capabilities and flows of that domain, which the resources that contribute to it. You can use a mix of manually build entities and modelling and combine it with discovery rules for places where you don't control the life cycle of the contributing resources.
+
+![Adoption step 3, refine](../../media/adoption-step-3-refine.svg)
+
+You build in failover paths and alerting on the levels where it's most meaningful to you. You can now separate between an outage of the secondary path and a full outage of all connectivity.
 
 ## References
 

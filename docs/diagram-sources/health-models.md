@@ -150,7 +150,7 @@ flowchart BT
 ## Diagram 5: One resource in two models
 
 ```mermaid swimlane title="One resource, two models" subtitle="The same firewall, with the signals each model cares about"
-%%| lanes: ["Portfolio", "Targeted models", "Entities", "Signals per concern"]
+%%| lanes: ["Portfolio", "Targeted models", "Entities"]
 flowchart BT
     connSig["SNAT port utilisation = 42%<br/>Tunnel state = connected"] --> fwConn["Azure Firewall<br/>connectivity concern<br/>healthy"]
     excSig["Threat intel hits = 128 (degraded)<br/>Denied partner flows = 4.1k"] --> fwExc["Azure Firewall<br/>partner concern<br/>degraded"]
@@ -167,4 +167,89 @@ flowchart BT
     class connSig,excSig blue;
     class fwConn,connModel green;
     class fwExc,excModel,root amber;
+```
+
+## Diagram 6: Adoption step 1, discovery
+
+The plain mermaid renderer is forced here with `%%| renderer: mermaid`. The swimlane
+renderer needs 1980px for this many leaves, which is unreadable in the 796px content
+column; the plain renderer fits the same graph in about 1370px and still honours the
+health classes, so states from recommended signals are visible.
+
+```mermaid title="Adoption step 1, discovery"
+%%| renderer: mermaid
+flowchart TB
+    root["Contoso-Prod estate"] --> conn["Connectivity"]
+    root --> id["Identity"]
+    root --> mgmt["Management"]
+    root --> lz["Landing zones"]
+
+    conn --> hyb["Hybrid links"]
+    conn --> hub["Hub networking"]
+    conn --> dns["DNS"]
+    id --> dc["Domain services"]
+    id --> kv["Key vaults"]
+    mgmt --> law["Log Analytics"]
+    mgmt --> bak["Backup and recovery"]
+    lz --> corp["Corp"]
+    lz --> onl["Online"]
+
+    classDef green fill:#f2f8f2,stroke:#a0d8a0;
+    classDef amber fill:#fbf2e7,stroke:#db7500;
+    classDef red fill:#faeceb,stroke:#ba0d16;
+    class hub,dns,dc,law,corp green;
+    class hyb,kv,bak,conn,id,mgmt,root amber;
+    class onl,lz red;
+```
+
+## Diagram 7: Adoption step 2, analyze
+
+```mermaid swimlane title="Adoption step 2, analyze" subtitle="Keep the alert rules you act on, group them into platform aspects"
+%%| lanes: ["Model root", "Platform aspects"]
+flowchart BT
+    erSig["ExpressRoute BGP availability = 99.9%<br/>VPN tunnel state = connected"] --> reach["Hybrid reachability<br/>healthy"]
+    fwSig["Firewall health = 100%<br/>SNAT port utilisation = 38%"] --> egress["Egress control<br/>healthy"]
+    kvSig["Key Vault availability = 100%<br/>Certificate expiry = 9 days (degraded)"] --> secrets["Secrets and certificates<br/>degraded"]
+    lawSig["Log ingestion latency = 3 min"] --> pipe["Telemetry pipeline<br/>healthy"]
+
+    reach --> root["Platform health<br/>degraded"]
+    egress --> root
+    secrets --> root
+    pipe --> root
+
+    classDef blue fill:#eff6fc,stroke:#0078D4;
+    classDef green fill:#f2f8f2,stroke:#a0d8a0;
+    classDef amber fill:#fbf2e7,stroke:#db7500;
+    class erSig,fwSig,kvSig,lawSig blue;
+    class reach,egress,pipe green;
+    class secrets,root amber;
+```
+
+## Diagram 8: Adoption step 3, refine
+
+```mermaid swimlane title="Adoption step 3, refine" subtitle="Add dependencies, tiers and an objective"
+%%| lanes: ["Model root", "Flows", "Capabilities", "Resources and signals"]
+flowchart BT
+    erSig["BGP availability = 98.7% (unhealthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
+    vpnSig["Azure Resource Health = Available"] --> vpn["VPN gateway<br/>healthy"]
+    kvSig["Certificate expiry = 9 days (degraded)"] --> kv["Key Vault<br/>degraded"]
+
+    er --> primary["Primary path<br/>(worst of)<br/>unhealthy"]
+    vpn --> backup["Failover path<br/>healthy"]
+    kv --> secrets["Secrets<br/>degraded"]
+
+    primary --> conn["Hybrid connectivity<br/>(not-healthy limit)<br/>degraded"]
+    backup --> conn
+    secrets -. "limited" .-> conn
+
+    conn --> root["Platform health<br/>objective 99.5%<br/>degraded"]
+
+    classDef blue fill:#eff6fc,stroke:#0078D4;
+    classDef green fill:#f2f8f2,stroke:#a0d8a0;
+    classDef amber fill:#fbf2e7,stroke:#db7500;
+    classDef red fill:#faeceb,stroke:#ba0d16;
+    class erSig,vpnSig,kvSig blue;
+    class vpn,backup green;
+    class kv,secrets,conn,root amber;
+    class er,primary red;
 ```
