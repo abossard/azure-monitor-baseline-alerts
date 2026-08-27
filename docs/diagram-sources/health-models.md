@@ -3,16 +3,16 @@
 These mermaid blocks are the source of the SVGs used by
 `docs/content/patterns/alz/Overview/Health-Models-Adoption.md`.
 
-This directory is not mounted as Hugo content (`config/_default/hugo.toml` mounts
-only `docs/content`, `docs/static`, `docs/layouts`, `docs/data`, `docs/assets`,
-`docs/i18n` and `docs/archetypes`), so this file is never published.
+This directory is not mounted into Hugo in `config/_default/hugo.toml`, so this
+file is never published.
 
-Regenerate the SVGs with [ahm-diagrammo](https://github.com/abossard/ahm-diagrammo):
+Regenerate the SVGs with [ahm-diagrammo](https://github.com/abossard/ahm-diagrammo). The committed SVGs are the published artifacts:
 
 ```bash
 # Render into a scratch directory: the CLI also writes gallery.html and
 # manifest.json, which do not belong in the media folder.
-npx --yes ahm-diagrammo docs/diagram-sources/health-models.md \
+npx --yes github:abossard/ahm-diagrammo#c9a96d200a92d9f25830eeb1e1ad4f293b84b33c \
+  docs/diagram-sources/health-models.md \
   --out /tmp/health-model-svg --strict
 cp /tmp/health-model-svg/*.svg docs/content/patterns/alz/media/
 
@@ -35,21 +35,21 @@ PY
 The output file name comes from each block's `title=`. Changing a title renames
 the SVG, so update the image reference in the page at the same time.
 
-Node colour is set by the `class` assignment, not by the label text:
-`blue` is a signal, `green` is healthy, `amber` is degraded, `red` is unhealthy.
+Node color is set by the `class` assignment, not by the label text:
+`blue` is a signal, `green` is healthy, `amber` is degraded, and `red` is unhealthy.
 
 ## Diagram 1: AMBA alerts become signals
 
 ```mermaid swimlane title="AMBA alerts become health model signals" subtitle="Signals set entity health, entities roll up, only the root carries the objective"
-%%| lanes: ["Domain root", "Landing zone flows", "System flows", "Azure resources and their signals"]
+%%| lanes: ["Domain root", "Domain flows", "System flows", "Azure resources and their signals"]
 flowchart BT
     erSig["ExpressRoute BGP availability = 98.7% (unhealthy)<br/>Ingress bits = 1.4 Gbps (healthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
     vpnSig["Azure Resource Health = Available (healthy)"] --> vpn["VPN gateway<br/>healthy"]
-    lawSig["Log ingestion latency = 4 min (healthy)"] --> law["Log Analytics workspace<br/>healthy"]
+    lawSig["Log ingestion latency = 9 min (degraded)"] --> law["Log Analytics workspace<br/>degraded"]
 
     er --> primary["Primary path<br/>(worst of)<br/>unhealthy"]
     vpn --> backup["Failover path<br/>healthy"]
-    law --> diag["Diagnostics pipeline<br/>healthy"]
+    law --> diag["Diagnostics pipeline<br/>degraded"]
 
     primary --> flow["Hybrid connectivity<br/>(not-healthy limit)<br/>degraded"]
     backup --> flow
@@ -62,8 +62,8 @@ flowchart BT
     classDef amber fill:#fbf2e7,stroke:#db7500;
     classDef red fill:#faeceb,stroke:#ba0d16;
     class erSig,vpnSig,lawSig blue;
-    class vpn,backup,law,diag green;
-    class flow,root amber;
+    class vpn,backup green;
+    class law,diag,flow,root amber;
     class er,primary red;
 ```
 
@@ -99,23 +99,29 @@ flowchart BT
 
 ## Diagram 3: Health models at tenant scale
 
-```mermaid swimlane title="Health models at tenant scale" subtitle="A tenant model splits into domains, each domain references its own health model"
-%%| lanes: ["Tenant", "Domains", "Referenced health models"]
+```mermaid swimlane title="Health models at tenant scale" subtitle="Each child root state rolls up through its discovered parent-domain entity"
+%%| lanes: ["Parent model root", "Parent domain entities", "Tagged child-model discovery", "Deployment checks"]
 flowchart BT
-    connHM["Connectivity-Contoso-Prod<br/>degraded"] --> conn["Connectivity<br/>degraded"]
-    idHM["Identity-Contoso-Prod<br/>healthy"] --> identity["Identity<br/>healthy"]
-    secHM["Security-Contoso-Prod<br/>healthy"] --> security["Security<br/>healthy"]
-    othHM["Management-Contoso-Prod<br/>healthy"] --> other["Your other domains<br/>healthy"]
+    secPh["Dummy entity<br/>(deployment check only)<br/>healthy"] --> secHM["ahm-alz-security<br/>healthy"]
+    idPh["Dummy entity<br/>(deployment check only)<br/>healthy"] --> idHM["ahm-alz-identity<br/>healthy"]
+    connPh["Dummy entity<br/>(deployment check only)<br/>healthy"] --> connHM["ahm-alz-connectivity<br/>healthy"]
+    mgmtPh["Dummy entity<br/>(deployment check only)<br/>healthy"] --> mgmtHM["ahm-alz-management<br/>healthy"]
+    lzPh["Dummy entity<br/>(deployment check only)<br/>healthy"] --> lzHM["ahm-alz-landing-zones<br/>healthy"]
 
-    conn --> tenant["Contoso-Prod<br/>objective 99.5%<br/>degraded"]
-    identity --> tenant
-    security --> tenant
-    other --> tenant
+    secHM --> security["Security<br/>healthy"]
+    idHM --> identity["Identity<br/>healthy"]
+    connHM --> conn["Connectivity<br/>healthy"]
+    mgmtHM --> mgmt["Management<br/>healthy"]
+    lzHM --> lz["Landing zones<br/>healthy"]
+
+    security --> platform["ahm-alz-platform<br/>healthy"]
+    identity --> platform
+    conn --> platform
+    mgmt --> platform
+    lz --> platform
 
     classDef green fill:#f2f8f2,stroke:#a0d8a0;
-    classDef amber fill:#fbf2e7,stroke:#db7500;
-    class idHM,identity,secHM,security,othHM,other green;
-    class connHM,conn,tenant amber;
+    class secPh,idPh,connPh,mgmtPh,lzPh,secHM,idHM,connHM,mgmtHM,lzHM,security,identity,conn,mgmt,lz,platform green;
 ```
 
 ## Diagram 4: A referenced domain model
@@ -125,7 +131,7 @@ flowchart BT
 flowchart BT
     erSig["ExpressRoute BGP availability = 98.7% (unhealthy)<br/>Ingress bits = 1.4 Gbps (healthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]
     vpnSig["Azure Resource Health = Available (healthy)"] --> vpn["VPN gateway<br/>healthy"]
-    fwSig["SNAT port utilisation = 42% (healthy)<br/>Firewall health = 100%"] --> fw["Azure Firewall<br/>healthy"]
+    fwSig["SNAT port utilization = 42% (healthy)<br/>Firewall health = 100%"] --> fw["Azure Firewall<br/>healthy"]
 
     er --> primary["Primary path<br/>(worst of)<br/>unhealthy"]
     vpn --> backup["Failover path<br/>healthy"]
@@ -149,10 +155,10 @@ flowchart BT
 
 ## Diagram 5: One resource in two models
 
-```mermaid swimlane title="One resource, two models" subtitle="The same firewall, with the signals each model cares about"
+```mermaid swimlane title="One resource, two models" subtitle="The same firewall with signals selected for each model"
 %%| lanes: ["Portfolio", "Targeted models", "Entities"]
 flowchart BT
-    connSig["SNAT port utilisation = 42%<br/>Tunnel state = connected"] --> fwConn["Azure Firewall<br/>connectivity concern<br/>healthy"]
+    connSig["SNAT port utilization = 42%<br/>Tunnel state = connected"] --> fwConn["Azure Firewall<br/>connectivity concern<br/>healthy"]
     excSig["Threat intel hits = 128 (degraded)<br/>Denied partner flows = 4.1k"] --> fwExc["Azure Firewall<br/>partner concern<br/>degraded"]
 
     fwConn --> connModel["hm-conn-partner<br/>healthy"]
@@ -171,10 +177,9 @@ flowchart BT
 
 ## Diagram 6: Adoption step 1, discovery
 
-The plain mermaid renderer is forced here with `%%| renderer: mermaid`. The swimlane
-renderer needs 1980px for this many leaves, which is unreadable in the 796px content
-column; the plain renderer fits the same graph in about 1370px and still honours the
-health classes, so states from recommended signals are visible.
+Use the plain mermaid renderer here with `%%| renderer: mermaid`. It keeps this
+wide, shallow inventory compact and preserves the health classes, so recommended
+signal states remain visible.
 
 ```mermaid title="Adoption step 1, discovery"
 %%| renderer: mermaid
@@ -204,12 +209,12 @@ flowchart TB
 
 ## Diagram 7: Adoption step 2, analyze
 
-```mermaid swimlane title="Adoption step 2, analyze" subtitle="Model the system flows you offer, then hang the contributing resources underneath"
+```mermaid swimlane title="Adoption step 2, analyze" subtitle="Model system flows and their contributing resources"
 %%| lanes: ["Model root", "System flows you offer", "Contributing resources"]
 flowchart BT
     erSig["BGP availability = 99.9%"] --> er["ExpressRoute circuit<br/>healthy"]
     vpnSig["Tunnel state = connected"] --> vpn["VPN gateway<br/>healthy"]
-    fwSig["Firewall health = 100%<br/>SNAT port utilisation = 38%"] --> fw["Azure Firewall<br/>healthy"]
+    fwSig["Firewall health = 100%<br/>SNAT port utilization = 38%"] --> fw["Azure Firewall<br/>healthy"]
     kvSig["Vault availability = 100%<br/>Certificate expiry = 9 days (degraded)"] --> kv["Key Vault<br/>degraded"]
 
     er --> hybrid["Hybrid connectivity<br/>healthy"]
@@ -231,7 +236,7 @@ flowchart BT
 
 ## Diagram 8: Adoption step 3, refine
 
-```mermaid swimlane title="Adoption step 3, refine" subtitle="Split the system flow into paths, alert where it means something"
+```mermaid swimlane title="Adoption step 3, refine" subtitle="Separate primary and failover paths, then alert on flow health"
 %%| lanes: ["Domain model root", "System flows", "Paths", "Resources and signals"]
 flowchart BT
     erSig["BGP availability = 98.7% (unhealthy)"] --> er["ExpressRoute circuit<br/>unhealthy"]

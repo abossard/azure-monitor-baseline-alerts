@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="976" height="465" viewBox="0 0 976 465" font-family="Segoe UI, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="976" height="513" viewBox="0 0 976 513" font-family="Segoe UI, -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
 <defs><filter id="cs" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="1.3" flood-color="#000" flood-opacity="0.1"/></filter></defs>
-<rect width="976" height="465" fill="#ffffff"/>
+<rect width="976" height="513" fill="#ffffff"/>
 <rect x="0" y="78.0" width="976" height="90.0" fill="#ffffff"/>
 <line x1="0" y1="78.0" x2="976" y2="78.0" stroke="#e6e4e2"/>
 <text x="806.9" y="127.5" font-size="13" font-weight="700" fill="#323130">Domain model root</text>
@@ -15,18 +15,18 @@
 <text x="806.9" y="402.0" font-size="13" font-weight="700" fill="#323130">Resources and signals</text>
 <line x1="0" y1="464.5" x2="976" y2="464.5" stroke="#e6e4e2"/>
 <text x="40" y="34" font-size="18" font-weight="700" fill="#242424">Adoption step 3, refine</text>
-<text x="40" y="52" font-size="12" fill="#605e5c">Split the system flow into paths, alert where it means something</text>
-<text x="572.5" y="48" font-size="11.5" font-weight="600" fill="#605e5c" text-anchor="end">Legend</text>
-<circle cx="590.5" cy="44" r="4.5" fill="#4c9a2a"/>
-<text x="600.5" y="48" font-size="11.5" fill="#323130">Healthy</text>
-<circle cx="656.2" cy="44" r="4.5" fill="#c26a00"/>
-<text x="666.2" y="48" font-size="11.5" fill="#323130">Degraded</text>
-<circle cx="733.8" cy="44" r="4.5" fill="#c50f18"/>
-<text x="743.8" y="48" font-size="11.5" fill="#323130">Unhealthy</text>
-<circle cx="812.6" cy="44" r="4.5" fill="#8a8886"/>
-<text x="822.6" y="48" font-size="11.5" fill="#323130">Unknown</text>
-<g transform="translate(881.5,37.0) scale(0.875)"><rect x="1.5" y="8" width="2.6" height="6" rx="0.6" fill="#8661c5"/><rect x="5.7" y="4.5" width="2.6" height="9.5" rx="0.6" fill="#0078D4"/><rect x="9.9" y="6.5" width="2.6" height="7.5" rx="0.6" fill="#3fb0ac"/></g>
-<text x="899.5" y="48" font-size="11.5" fill="#323130">Metric</text>
+<text x="40" y="52" font-size="12" fill="#605e5c">Separate primary and failover paths, then alert on flow health</text>
+<text x="40.0" y="503.0" font-size="11.5" font-weight="600" fill="#605e5c">Legend</text>
+<circle cx="99.7" cy="499.0" r="4.5" fill="#4c9a2a"/>
+<text x="109.7" y="503.0" font-size="11.5" fill="#323130">Healthy</text>
+<circle cx="165.5" cy="499.0" r="4.5" fill="#c26a00"/>
+<text x="175.5" y="503.0" font-size="11.5" fill="#323130">Degraded</text>
+<circle cx="243.0" cy="499.0" r="4.5" fill="#c50f18"/>
+<text x="253.0" y="503.0" font-size="11.5" fill="#323130">Unhealthy</text>
+<circle cx="321.8" cy="499.0" r="4.5" fill="#8a8886"/>
+<text x="331.8" y="503.0" font-size="11.5" fill="#323130">Unknown</text>
+<g transform="translate(390.7,492.0) scale(0.875)"><rect x="1.5" y="8" width="2.6" height="6" rx="0.6" fill="#8661c5"/><rect x="5.7" y="4.5" width="2.6" height="9.5" rx="0.6" fill="#0078D4"/><rect x="9.9" y="6.5" width="2.6" height="7.5" rx="0.6" fill="#3fb0ac"/></g>
+<text x="408.7" y="503.0" font-size="11.5" fill="#323130">Metric</text>
 <g transform="translate(40.0,0)">
 <g fill="none" stroke-linecap="butt" stroke-linejoin="round">
 <path d="M137.4 366.0 L137.4 334.0" stroke="#ba0d16" stroke-width="1.7"/>
